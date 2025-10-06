@@ -1,0 +1,12 @@
+name: windmap
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - geopandas
+  - mapclassify
+  - scikit-learn
+  - matplotlib
+  - contextily
+  - jupyterlab
+  - ipykernel
