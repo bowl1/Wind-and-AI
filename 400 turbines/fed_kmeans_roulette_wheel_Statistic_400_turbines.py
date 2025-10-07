@@ -208,7 +208,16 @@ def run_federated_kmeans(
 # ===== Grid Search for Best Parameters =====
 def grid_search_federated_kmeans():
     feature_csv = (
-        "./selected feature statistics/features_in_group_stage_400_turbines.csv"
+        # first try the full set of 400 turbines
+        # "./selected feature statistics/features_in_group_stage_400_turbines.csv" 
+        
+        # second time to group the biggst cluster (remove those outliner groups and small groups)
+        # "./group_stage_results/second_group/features_cluster_0_1st.csv"
+        
+        # third time to group the biggest cluster
+        "./group_stage_results/third_group/features_cluster_0_2th.csv"
+        
+      
     )
     coord_csv = "./selected turbines/selected_400_turbines_filtered.csv"
 
@@ -217,7 +226,7 @@ def grid_search_federated_kmeans():
     results = []
 
     for n_clients in range(5, 15):
-        for k_global in range(4, 8):
+        for k_global in range(2, 8):
             for crounds in range(3, 10):
                 print(
                     f"\n>>> Running: n_clients={n_clients}, k_global={k_global}, crounds={crounds}"
@@ -264,7 +273,7 @@ def grid_search_federated_kmeans():
         raise RuntimeError(" No successful run found during grid search.")
 
     print(
-        f"\n🎯 Best Silhouette Score: {best_score:.4f} with n_clients={best_params[0]}, "
+        f"\nBest Silhouette Score: {best_score:.4f} with n_clients={best_params[0]}, "
         f"k_global={best_params[1]}, crounds={best_params[2]}"
     )
 
@@ -286,4 +295,5 @@ def grid_search_federated_kmeans():
 if __name__ == "__main__":
     grid_search_federated_kmeans()
 
-# the process takes about 4m on MacBook Pro M3
+# first stage group: the process takes about 4m on MacBook Pro M3
+# second stage group: the process takes about 4m on MacBook Pro M3
