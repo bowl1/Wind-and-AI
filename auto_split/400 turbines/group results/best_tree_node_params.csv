@@ -1,0 +1,3 @@
+Node,depth,silhouette,n_clients,k_global,crounds,forced_split
+cluster_0,1,0.7972878171533503,8,4,9,True
+cluster_1,2,0.433988810967108,3,4,9,True
