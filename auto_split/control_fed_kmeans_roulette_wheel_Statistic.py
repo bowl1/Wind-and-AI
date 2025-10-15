@@ -134,7 +134,7 @@ def run_federated_kmeans(
 
     # Federated Training
     # global_centers = double_roulette_init(clients, k_global)
-    # 用所有客户端数据作为初始化池
+    # use all the client data to initialize global centers
     all_data = np.vstack([client.data for client in clients])
     init_kmeans = KMeans(n_clusters=k_global, init='k-means++', n_init=1, random_state=42)
     init_kmeans.fit(all_data)
