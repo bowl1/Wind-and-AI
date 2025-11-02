@@ -226,6 +226,11 @@ class Server:
                 num_test_examples.append(num_test_instances)
                 test_losses[cid] = test_loss
                 test_metrics[cid] = test_eval_metrics
+                
+                # Add R^2 related info:
+                if "SSE" in test_eval_metrics and "SST" in test_eval_metrics:
+                    history.add_local_test_sse({cid: test_eval_metrics["SSE"]}, fl_round)
+                    history.add_local_test_sst({cid: test_eval_metrics["SST"]}, fl_round)
 
         history.add_global_train_losses(self.weighted_loss(num_train_examples, list(train_losses.values())))
         history.add_global_train_metrics(self.weighted_metrics(num_train_examples, train_metrics))
@@ -238,6 +243,15 @@ class Server:
             self.best_model = copy.deepcopy(self.global_model)
 
         history.add_global_test_metrics(self.weighted_metrics(num_test_examples, test_metrics))
+        # Step: compute global R² from test_metrics if SSE/SST exists
+        if fl_round in history.local_test_sse and fl_round in history.local_test_sst:
+            total_sse = sum(history.local_test_sse[fl_round].values())
+            total_sst = sum(history.local_test_sst[fl_round].values())
+            if total_sst > 0:
+                r2 = 1 - (total_sse / total_sst)
+            else:
+                r2 = 0.0
+            history.add_global_test_r2(r2)
 
     def _get_initial_model(self) -> List[np.ndarray]:  #获取初始模型，从一个随机客户端获取模型参数
         """Get initial parameters from a random client"""

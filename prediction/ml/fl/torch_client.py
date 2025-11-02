@@ -141,12 +141,12 @@ class TorchRegressionClient(Client):
         if data is None and method == "train":
             data = self.train_loader
 
-        loss, mse, rmse, mae, r2, nrmse = test(self.net, data, params["criterion"], device=self.device)
+        loss, mse, rmse, mae, r2, nrmse, sse, sst = test(self.net, data, params["criterion"], device=self.device)
 
-        metrics = {"MSE": mse, "RMSE": rmse, "MAE": mae, "R^2": r2, "NRMSE": nrmse}
+        metrics = {"MSE": mse, "RMSE": rmse, "MAE": mae, "R^2": r2, "NRMSE": nrmse, "SSE": sse, "SST": sst}
 
         if verbose:
             log(INFO, f"[Client {self.cid} Evaluation on {len(data.dataset)} samples] "
-                      f"loss: {loss}, mse: {mse}, rmse: {rmse}, mae: {mae}, nrmse: {nrmse}")
+                      f"loss: {loss}, mse: {mse}, rmse: {rmse}, mae: {mae}, nrmse: {nrmse}, sse: {sse}, sst: {sst}")
 
         return len(data.dataset), loss, metrics

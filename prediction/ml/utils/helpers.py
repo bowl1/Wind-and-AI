@@ -100,13 +100,19 @@ def accumulate_metric(y_true: Union[np.ndarray, torch.tensor],
         nrmse = (nrmse_first_dim + nrmses) / len(dims)
     else:
         nrmse = nrmse_first_dim
+    
+     # --- new: compute SSE and SST for global R² ---
+    y_true_flat = y_true.flatten()
+    y_pred_flat = y_pred.flatten()
+    sse = np.sum((y_true_flat - y_pred_flat) ** 2)     # sum of squared errors
+    sst = np.sum((y_true_flat - np.mean(y_true_flat)) ** 2)  # total sum of squares
 
     if log_per_output:
         res = log_metrics(y_true, y_pred)
         if return_all:
             return mse, rmse, mae, r2, nrmse, res
 
-    return mse, rmse, mae, r2, nrmse
+    return mse, rmse, mae, r2, nrmse, sse, sst
 
 
 class EarlyStopping:
@@ -117,7 +123,7 @@ class EarlyStopping:
         self.counter = 0
         self.best_score = None
         self.early_stop = False
-        self.val_loss_min = np.Inf
+        self.val_loss_min = np.inf
         self.delta = delta
         self.trace = trace
         self.trace_func = trace_func

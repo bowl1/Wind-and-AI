@@ -167,7 +167,7 @@ def generate_time_lags(df: pd.DataFrame,
             for col in columns:
                 if col == "time" or col == identifier:
                     continue
-                df_n[f"{col}_lag-{n}"] = df_n[col].shift(n).replace(np.NaN, 0).astype("float64")
+                df_n[f"{col}_lag-{n}"] = df_n[col].shift(n).replace(np.nan, 0).astype("float64")
         df_n = df_n.iloc[n_lags:]
 
         dfs.append(df_n)
@@ -291,8 +291,8 @@ def assign_statistics(X: pd.DataFrame,
 
 
 def to_timeseries_rep(x: Union[np.ndarray, Dict[Union[str, int], np.ndarray]],
-                      num_lags: int = 10,
-                      num_features: int = 11) -> Union[np.ndarray, Dict[Union[str, int], np.ndarray]]:
+                      num_lags: int = 24,
+                      num_features: int = 9) -> Union[np.ndarray, Dict[Union[str, int], np.ndarray]]:
     """Transforms a dataframe to timeseries representation."""
     if isinstance(x, np.ndarray):
         x_reshaped = x.reshape((len(x), num_lags, num_features, -1))
@@ -513,9 +513,9 @@ def get_exogenous_data_by_area(exogenous_data_train: pd.DataFrame,
 
 
 def to_torch_dataset(X: np.ndarray, y: np.ndarray,
-                     num_lags: int = 10,
-                     num_features: int = 11,
-                     indices: List[int] = [1, 10, 19, 28, 37, 46, 55, 64], # allow specifying which features are targets
+                     num_lags: int = 24,
+                     num_features: int = 9,
+                     indices: List[int] = [], # allow specifying which features are targets
                      batch_size: int = 32,
                      exogenous_data: Optional[np.ndarray] = None,
                      shuffle: bool = False) -> torch.utils.data.DataLoader:
@@ -541,9 +541,9 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
     """Dataset wrapper. This class can handle either vector or matrices."""
 
     def __init__(self, X: np.ndarray, y: np.ndarray,
-                 num_lags: int = 10,
-                 num_features: int = 11,
-                 indices: List[int] = [1, 10, 19, 28, 37, 46, 55, 64],
+                 num_lags: int = 24,
+                 num_features: int = 9,
+                 indices: List[int] = [],
                  exogenous: Optional[np.ndarray] = None):
         if exogenous is not None:
             assert X.size(0) == y.size(0) == exogenous.size(0), "Size mismatch between tensors"
@@ -560,27 +560,9 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
         return self.X.size(0)
 
     def __getitem__(self, index):
-        if index == 0:
-            tmp_X = self.X[index]
-            if len(self.X.shape) < 3:
-                tmp_X = tmp_X.view(self.num_lags, self.num_features, 1)
-            y_hist = []
-            for i, lag in enumerate(tmp_X):
-                if i == 0:
-                    pad = torch.zeros_like(lag[self.indices])
-                    y_hist.append(pad.reshape(1, -1))
-                else:
-                    y_hist.append(tmp_X[i - 1][self.indices].reshape(1, -1))
-            y_hist = torch.cat(y_hist)
-
-        elif index < self.num_lags + 1:
-            last_obs = self.X[index - 1]
-            if len(self.X.shape) < 3:
-                last_obs = last_obs.view(self.num_lags, self.num_features, 1)
-            y_hist = []
-            for i, lag in enumerate(last_obs):
-                y_hist.append(last_obs[i][self.indices].reshape(1, -1))
-            y_hist = torch.cat(y_hist)
+        y_dim = self.y.shape[1]
+        if index < self.num_lags + 1:
+            y_hist = torch.zeros(self.num_lags, y_dim)
         else:
             y_hist = self.y[index - self.num_lags - 1: index - 1]
 

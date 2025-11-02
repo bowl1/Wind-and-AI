@@ -89,15 +89,15 @@ def train(model: torch.nn.Module,
             optimizer.step()
             epoch_loss.append(loss.item())
         train_loss = sum(epoch_loss) / len(epoch_loss)
-        _, train_mse, train_rmse, train_mae, train_r2, train_nrmse = test(model, train_loader,
+        _, train_mse, train_rmse, train_mae, train_r2, train_nrmse, train_sse, train_sst = test(model, train_loader,
                                                                                       criterion, device)
-        test_loss, test_mse, test_rmse, test_mae, test_r2, test_nrmse = test(model, test_loader,
+        test_loss, test_mse, test_rmse, test_mae, test_r2, test_nrmse, test_sse, test_sst = test(model, test_loader,
                                                                                         criterion, device)
         if (epoch + 1) % log_per == 0:
             log(INFO, f"Epoch {epoch + 1} [Train]: loss {train_loss}, mse: {train_mse}, "
-                      f"rmse: {train_rmse}, mae {train_mae}, r2: {train_r2}, nrmse: {train_nrmse}")
+                      f"rmse: {train_rmse}, mae {train_mae}, r2: {train_r2}, nrmse: {train_nrmse}, sse: {train_sse}, sst: {train_sst}")
             log(INFO, f"Epoch {epoch + 1} [Test]: loss {test_loss}, mse: {test_mse}, "
-                      f"rmse: {test_rmse}, mae {test_mae}, r2: {test_r2}, nrmse: {test_nrmse}")
+                      f"rmse: {test_rmse}, mae {test_mae}, r2: {test_r2}, nrmse: {test_nrmse}, sse: {test_sse}, sst: {test_sst}")
         train_loss_history.append(train_mse)
         train_rmse_history.append(train_rmse)
         test_loss_history.append(test_mse)
@@ -144,7 +144,7 @@ def train(model: torch.nn.Module,
 
 
 def test(model, data, criterion, device) -> Union[
-    Tuple[float, float, float, float], List[torch.tensor], torch.tensor]:
+    Tuple[float, float, float, float, float, float, float], List[torch.tensor], torch.tensor]:
     """Tests a trained model."""
     model.to(device)
     model.eval()
@@ -168,8 +168,8 @@ def test(model, data, criterion, device) -> Union[
 
     y_true = torch.stack(y_true)
     y_pred = torch.stack(y_pred)
-    mse, rmse, mae, r2, nrmse = accumulate_metric(y_true.cpu(), y_pred.cpu())
+    mse, rmse, mae, r2, nrmse, sse, sst = accumulate_metric(y_true.cpu(), y_pred.cpu())
     if criterion is None:
-        return mse, rmse, mae, r2, nrmse, y_pred
+        return mse, rmse, mae, r2, nrmse, y_pred, sse, sst
 
-    return loss, mse, rmse, mae, r2, nrmse
+    return loss, mse, rmse, mae, r2, nrmse, sse, sst

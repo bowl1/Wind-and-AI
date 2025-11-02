@@ -30,6 +30,12 @@ class History:
 
         self.global_test_losses: List[float] = []
         self.global_test_metrics: Dict[str, List[float]] = dict()
+        self.global_test_r2: List[float] = []
+        
+        # for R^2 calculation
+        self.local_test_sse: Dict[Union[str, int], Dict[int, float]] = dict()
+        self.local_test_sst: Dict[Union[str, int], Dict[int, float]] = dict()
+       
 
     def add_local_train_loss(self, clients_losses: Dict[Union[str, int], float], fl_round: int) -> None:
         """Add one local train loss entry."""
@@ -80,6 +86,22 @@ class History:
             if key not in self.global_test_metrics:
                 self.global_test_metrics[key] = []
             self.global_test_metrics[key].append(averaged_metrics[key])
+    
+    # R^2 related methods
+    def add_local_test_sse(self, local_sse_dict, round_num):
+        if not hasattr(self, "local_test_sse"):
+            self.local_test_sse = {}
+        self.local_test_sse[round_num] = local_sse_dict
+
+    def add_local_test_sst(self, local_sst_dict, round_num):
+        if not hasattr(self, "local_test_sst"):
+            self.local_test_sst = {}
+        self.local_test_sst[round_num] = local_sst_dict
+     
+     
+    def add_global_test_r2(self, r2: float) -> None:
+        """Store computed global R² per round."""
+        self.global_test_r2.append(r2)       
 
     def __repr__(self) -> str:
         rep = ""
@@ -101,6 +123,13 @@ class History:
             rep += "\nHistory (client, test metrics):\n"
             for client, history in self.local_test_metrics.items():
                 rep += f"\t{client}: {history}\n"
+          # R^2 related info      
+        if self.local_test_sse and self.local_test_sst:
+            rep += "\nHistory (client, test SSE & SST):\n"
+            for client in self.local_test_sse:
+                rep += f"\t{client}: SSE={self.local_test_sse[client]}, "
+                sst_str = self.local_test_sst.get(client, {})
+                rep += f"SST={sst_str}\n"
 
         if self.global_train_losses:
             rep += "\nHistory (global averaged train losses):\n"
@@ -117,5 +146,9 @@ class History:
             rep += "\nHistory (global averaged test metrics):\n"
             for metric, values in self.global_test_metrics.items():
                 rep += f"\t{metric}: {values}\n"
+        # R^2 related info
+        if self.global_test_r2:
+            rep += "\nHistory (global test R² per round):\n"
+            rep += f"\t{self.global_test_r2}\n"
 
         return rep
