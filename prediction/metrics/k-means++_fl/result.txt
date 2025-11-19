@@ -1,0 +1,13 @@
+train:
+📊 Final Weighted Global Metrics (last round):
+MSE: 0.015685
+RMSE: 0.122333
+MAE: 0.083790
+R^2 (based on SSE/SST): 0.688677
+
+test:
+📊 Final Weighted Global Metrics (last round):
+MSE: 0.017958
+RMSE: 0.130001
+MAE: 0.088406
+R^2 (based on SSE/SST): 0.699808

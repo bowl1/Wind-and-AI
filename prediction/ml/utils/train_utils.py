@@ -170,6 +170,6 @@ def test(model, data, criterion, device) -> Union[
     y_pred = torch.stack(y_pred)
     mse, rmse, mae, r2, nrmse, sse, sst = accumulate_metric(y_true.cpu(), y_pred.cpu())
     if criterion is None:
-        return mse, rmse, mae, r2, nrmse, y_pred, sse, sst
+        return loss, mse, rmse, mae, r2, nrmse,sse, sst, y_pred
 
-    return loss, mse, rmse, mae, r2, nrmse, sse, sst
+    return loss, mse, rmse, mae, r2, nrmse, sse, sst, y_pred

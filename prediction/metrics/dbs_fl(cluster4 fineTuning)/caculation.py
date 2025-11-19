@@ -1,0 +1,63 @@
+import ast
+import csv
+
+# Manually define the number of samples per cluster
+SAMPLE_COUNTS = {
+    "0": 51,
+    "2": 4,
+    "3": 251,
+    "4": 76,
+    "5": 6,
+    "6": 10,
+}
+
+# Read the contents of txt file
+with open("summary_train.txt", "r") as f:
+    content = f.read()
+
+# Split into chunks for each cluster
+blocks = content.split("cluster ")
+
+metrics = {}  # { cluster_id: {metric_name: last_value} }
+
+for block in blocks[1:]:  # skip first empty block
+    lines = block.strip().splitlines()
+    cluster_id = lines[0].strip(":")  # Get ID string
+    cluster_metrics = {}
+    for line in lines:
+        if ":" in line and "[" in line:
+            name, values_str = line.strip().split(": ", 1)
+            values = ast.literal_eval(values_str)
+            cluster_metrics[name.strip()] = values[-1]  # Get the last round value
+    metrics[cluster_id] = cluster_metrics
+    print(f"Per-Cluster Metrics (last round) - cluster {cluster_id}: {metrics[cluster_id]}")
+
+# Summary indicators
+total_samples = sum(SAMPLE_COUNTS.values())
+weighted_metrics = {
+    "MSE": 0,
+    "RMSE": 0,
+    "MAE": 0,
+    "NRMSE": 0,
+    "SSE": 0,
+    "SST": 0,
+}
+
+# weighted accumulation
+for cid, metric in metrics.items():
+    count = SAMPLE_COUNTS.get(cid, 0)
+    for k in weighted_metrics:
+        if k in ["SSE", "SST"]:
+            weighted_metrics[k] += metric[k]  # Accumulate
+        else:
+            weighted_metrics[k] += metric[k] * count / total_samples  # sample weighted average
+
+# Output weighted average results
+print("\n📊 Final Weighted Global Metrics (last round):")
+for k, v in weighted_metrics.items():
+    print(f"{k}: {v:.6f}")
+
+# Added standard R² calculation (based on total SSE/SST)
+global_r2 = 1 - (weighted_metrics["SSE"] / weighted_metrics["SST"])
+print(f"\n Global R^2 (based on SSE/SST): {global_r2:.6f}")
+

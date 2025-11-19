@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # === data loading ===
-features_df = pd.read_csv('auto_split/200 turbines/selected feature statistics/features_in_group_stage_200_turbines.csv')
+features_df = pd.read_csv('auto_split/400 turbines/selected feature statistics/features_in_group_stage_400_turbines.csv')
 features = features_df[[
     'mean_power_scaled',
     'std_power_scaled',

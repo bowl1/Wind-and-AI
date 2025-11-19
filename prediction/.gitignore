@@ -6,3 +6,4 @@ prediction/dataset/
 *.tar.gz
 __pycache__/
 .DS_Store
+*.csv
