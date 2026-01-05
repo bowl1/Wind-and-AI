@@ -1,7 +1,10 @@
 # Behaviour-Aware Federated Wind Power Forecasting System
 
-This repository designed and implemented a behavior-aware federated learning pipeline for large-scale, heterogeneous time-series forecasting:  
+This project targets a very practical problem in modern power systems: how to forecast the output of hundreds of small, independently owned wind turbines without centralizing all raw data. As distributed renewables grow, these turbines collectively influence local grid stability, market participation, and asset revenue, yet their data are often privacy-sensitive and highly heterogeneous. 
 
+By combining behaviour-aware clustering with federated LSTM forecasting, this system offers a way to build accurate, turbine-level short-term power forecasts while keeping data local, reducing communication cost, and providing operators and asset owners with a scalable tool for planning, anomaly detection, and decision-making.
+
+### Key features
 - Designed and implemented a behavior-aware federated learning framework for short-term power forecasting across 400+ independent wind turbines.
 
 - Designed and implemented a custom auto-split strategy for federated clustering, enabling recursive refinement of heterogeneous client groups based on silhouette scores and minimum cluster-size constraints.
