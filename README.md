@@ -112,7 +112,15 @@ This repository designed and implemented a behavior-aware federated learning pip
 ## 3. Experimental highlights
 
 ### 3.1 Clustering Results
-![Cluster-results](images/cluster-results.png)
+
+Overall, the clustering in the feature space successfully identifies several distinct op- erational patterns:
+
+- high-output, stable or highly variable turbines (Clusters 0 and 5), which differ mainly in their volatility patterns;
+- a large group of mainstream, stable turbines (Cluster 3), representing the “typical” individual turbine behaviour;
+- low-output or high-shutdown turbines (Clusters 4 and 1), where Cluster 1 corre- sponds to severely abnormal / faulty units and Cluster 4 to mid-risk, low-output turbines;
+- strongly dynamic or mildly unstable turbines (Clusters 2 and 6), which are more challenging from a forecasting perspective due to their ramp and shutdown characteristics.
+
+![Cluster-results](images/clustering-results.png)
 
 ### 3.2 Federated grouping strategies (all 400 turbines)
 
