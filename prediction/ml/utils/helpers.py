@@ -65,32 +65,37 @@ def log_metrics(y_true: np.ndarray,
     return res
 
 
-def accumulate_metric(y_true: Union[np.ndarray, torch.tensor],
-                      y_pred: Union[np.ndarray, torch.tensor],
-                      log_per_output: bool = False,
-                      dims: List[int] = [0], # to specify which dimensions to calculate NRMSE on
-                      return_all=False) -> Union[
-    Tuple[float, float, float, float, float],
-    Tuple[float, float, float, float, float, Union[None, Dict[int, List[float]]]]]:
-    """Regression metrics. Note that the dims parameter is only used for the targets of interest to calculate the
-    NRMSE metric."""
+def accumulate_metric(
+    y_true: Union[np.ndarray, torch.Tensor],
+    y_pred: Union[np.ndarray, torch.Tensor],
+    log_per_output: bool = False,
+    dims: List[int] = [0],
+    return_all: bool = False,
+    return_sse_sst: bool = False,
+):
+    """
+    默认：返回 (mse, rmse, mae, r2, nrmse)
+    若 return_sse_sst=True，则额外返回 sse, sst
+    若 log_per_output=True 且 return_all=True，则多返回 per-dim 结果
+    """
     if not isinstance(y_true, np.ndarray):
         y_true = y_true.cpu().numpy()
     if not isinstance(y_pred, np.ndarray):
         y_pred = y_pred.cpu().numpy()
+
     mse = mean_squared_error(y_true, y_pred)
     rmse = math.sqrt(mse)
     mae = mean_absolute_error(y_true, y_pred)
     r2 = r2_score(y_true, y_pred)
 
+    # ---- NRMSE ----
     y_true_first_dim = y_true[:, dims[0]]
     y_pred_first_dim = y_pred[:, dims[0]]
-
     rmse_first_dim = math.sqrt(mean_squared_error(y_true_first_dim, y_pred_first_dim))
     nrmse_first_dim = rmse_first_dim / np.mean(y_true_first_dim)
 
-    if y_true.shape[1] >= 2:
-        nrmses = 0
+    if y_true.shape[1] >= 2 and len(dims) > 1:
+        nrmses = 0.0
         for i in range(1, len(dims)):
             y_true_dim = y_true[:, dims[i]]
             y_pred_dim = y_pred[:, dims[i]]
@@ -100,19 +105,29 @@ def accumulate_metric(y_true: Union[np.ndarray, torch.tensor],
         nrmse = (nrmse_first_dim + nrmses) / len(dims)
     else:
         nrmse = nrmse_first_dim
-    
-     # --- new: compute SSE and SST for global R² ---
+
+    # ---- SSE / SST ----
     y_true_flat = y_true.flatten()
     y_pred_flat = y_pred.flatten()
-    sse = np.sum((y_true_flat - y_pred_flat) ** 2)     # sum of squared errors
-    sst = np.sum((y_true_flat - np.mean(y_true_flat)) ** 2)  # total sum of squares
+    sse = np.sum((y_true_flat - y_pred_flat) ** 2)
+    sst = np.sum((y_true_flat - np.mean(y_true_flat)) ** 2)
 
+    # ---- per-output 日志 ----
     if log_per_output:
         res = log_metrics(y_true, y_pred)
+
+        if return_all and return_sse_sst:
+            return mse, rmse, mae, r2, nrmse, res, sse, sst
         if return_all:
             return mse, rmse, mae, r2, nrmse, res
+        if return_sse_sst:
+            return mse, rmse, mae, r2, nrmse, sse, sst
+        return mse, rmse, mae, r2, nrmse
 
-    return mse, rmse, mae, r2, nrmse, sse, sst
+    if return_sse_sst:
+        return mse, rmse, mae, r2, nrmse, sse, sst
+
+    return mse, rmse, mae, r2, nrmse
 
 
 class EarlyStopping:

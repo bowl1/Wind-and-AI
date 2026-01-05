@@ -1,4 +1,0 @@
-Node,depth,silhouette,n_clients,k_global,crounds,forced_split
-cluster_0,1,0.7669777588366355,4,4,4,True
-cluster_1,2,0.6396543366076342,3,3,9,True
-cluster_6,3,0.5253311302173942,3,3,3,True

@@ -143,13 +143,18 @@ def train(model: torch.nn.Module,
     return best_model
 
 
-def test(model, data, criterion, device) -> Union[
-    Tuple[float, float, float, float, float, float, float], List[torch.tensor], torch.tensor]:
-    """Tests a trained model."""
+def test(model, data, criterion, device):
+    """
+    - 若 criterion 不为 None（训练/验证阶段，给 server.fit 用）：
+        返回：loss, mse, rmse, mae, r2, nrmse, sse, sst   ← 一共 8 个
+    - 若 criterion 为 None（推理/画图阶段，给 inference 用）：
+        返回：mse, rmse, mae, r2, nrmse, y_pred           ← 一共 6 个
+    """
     model.to(device)
     model.eval()
     y_true, y_pred = [], []
-    loss = 0.
+    loss = 0.0
+
     with torch.no_grad():
         for x, exogenous, y_hist, y in data:
             x, y = x.to(device), y.to(device)
@@ -158,18 +163,30 @@ def test(model, data, criterion, device) -> Union[
                 exogenous = exogenous.to(device)
             else:
                 exogenous = None
+
             out = model(x, exogenous, device, y_hist)
+
             if criterion is not None:
                 loss += criterion(out, y).item()
+
             y_true.extend(y)
             y_pred.extend(out)
 
-    loss /= len(data.dataset)
+    if criterion is not None:
+        loss /= len(data.dataset)
 
     y_true = torch.stack(y_true)
     y_pred = torch.stack(y_pred)
-    mse, rmse, mae, r2, nrmse, sse, sst = accumulate_metric(y_true.cpu(), y_pred.cpu())
-    if criterion is None:
-        return loss, mse, rmse, mae, r2, nrmse,sse, sst, y_pred
 
-    return loss, mse, rmse, mae, r2, nrmse, sse, sst, y_pred
+    if criterion is not None:
+        # ---- 训练 / 验证：需要 SSE / SST，返回 8 个值 ----
+        mse, rmse, mae, r2, nrmse, sse, sst = accumulate_metric(
+            y_true.cpu(), y_pred.cpu(), return_sse_sst=True
+        )
+        return loss, mse, rmse, mae, r2, nrmse, sse, sst
+
+    # ---- 推理 / 画图：不需要 SSE / SST，返回 6 个值 ----
+    mse, rmse, mae, r2, nrmse = accumulate_metric(
+        y_true.cpu(), y_pred.cpu(), return_sse_sst=False
+    )
+    return mse, rmse, mae, r2, nrmse, y_pred

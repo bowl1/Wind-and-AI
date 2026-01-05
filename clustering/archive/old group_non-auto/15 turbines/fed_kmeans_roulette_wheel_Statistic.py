@@ -222,23 +222,23 @@ print(f"\nCombined group (initial + final) saved to file: {combined_filename}")
 # Visualization: Radar chart showing the average feature profile for each cluster
 
 # Prepare
-clusters = cluster_means.index
-labels = feature_cols
-num_vars = len(labels)
-angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
-angles += angles[:1]  # Close the radar chart
+# clusters = cluster_means.index
+# labels = feature_cols
+# num_vars = len(labels)
+# angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+# angles += angles[:1]  # Close the radar chart
 
-# Plot
-plt.figure(figsize=(8, 6))
+# # Plot
+# plt.figure(figsize=(8, 6))
 
-for cluster_id in clusters:
-    values = cluster_means.loc[cluster_id].tolist()
-    values += values[:1]  # Close the radar chart
-    plt.polar(angles, values, label=f"Cluster {cluster_id}", marker='o')
+# for cluster_id in clusters:
+#     values = cluster_means.loc[cluster_id].tolist()
+#     values += values[:1]  # Close the radar chart
+#     plt.polar(angles, values, label=f"Cluster {cluster_id}", marker='o')
 
-plt.xticks(angles[:-1], labels, fontsize=9)
-plt.title("Cluster Feature Profile (Mean Values)", size=14)
-plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.05))
-plt.tight_layout()
-plt.savefig(f"cluster_feature_profile_radar_k{k_global}_r{crounds}.png", dpi=300)
-plt.show()
+# plt.xticks(angles[:-1], labels, fontsize=9)
+# plt.title("Cluster Feature Profile (Mean Values)", size=14)
+# plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.05))
+# plt.tight_layout()
+# plt.savefig(f"cluster_feature_profile_radar_k{k_global}_r{crounds}.png", dpi=300)
+# plt.show()
