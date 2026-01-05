@@ -8,3 +8,7 @@ prediction/dataset/
 *.csv
 __pycache__/
 .DS_Store
+clustering/data_process_and_select/
+prediction/dataset/
+prediction/metrics/
+prediction/notebooks/model_checkpoint/
