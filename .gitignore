@@ -12,4 +12,4 @@ clustering/data_process_and_select/
 prediction/dataset/
 prediction/metrics/
 prediction/notebooks/model_checkpoint/
-prediction/notebooks/03.Centralized_Training_all.ipynb
+prediction/notebooks/03.Centralized_Training_all.ipynbclustering/archive/
