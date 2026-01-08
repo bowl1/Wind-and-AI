@@ -18,6 +18,15 @@ By combining behaviour-aware clustering with federated LSTM forecasting, this sy
 
 ---
 
+## Demo
+![demo](images/demo.gif)
+
+For interactive demo application, please see https://github.com/bowl1/Behaviour-Aware-Federated-Wind-Power-Forecasting-System-demo
+
+![img](./images/application1.png)
+![img](./images/application2.png)
+![img](./images/application3.png)
+
 ## 1. Overview
 
 ### Real-world energy data
