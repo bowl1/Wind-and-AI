@@ -170,6 +170,6 @@ Overall, the clustering in the feature space successfully identifies several dis
 
 ## 4. Tech stack
 
-Python, PyTorch, LSTM, PySpark, Federated Learning, Data Preprocessing, KMeans++, Time-Series Forecasting, Privacy Protection algorithom
+Python, PyTorch, LSTM, PySpark, Machine Learning, Deep Learning, Federated Learning, Data Preprocessing, KMeans++, Time-Series Forecasting, Privacy Protection algorithom
 
 ---
