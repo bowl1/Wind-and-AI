@@ -8,3 +8,8 @@ __pycache__/
 .DS_Store
 *.csv
 clstering/archive/
+
+# Spark processed outputs
+spark/processed_data/
+spark/**/_SUCCESS
+spark/**/*.crc

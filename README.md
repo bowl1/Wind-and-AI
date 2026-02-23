@@ -29,7 +29,7 @@ For interactive demo application, please see https://github.com/bowl1/Behaviour-
 
 - Built on real-world utility datasets combining settlement metering data, wind turbine turbine data, and numerical weather prediction forecasts.
 - Each turbine has ≈ **8,760 hourly samples** in 2019 (24 hours × 365 days).
-
+git
 ![data curve](images/visualization.png)
 
 ### Behaviour-aware turbine clustering
@@ -105,7 +105,7 @@ For interactive demo application, please see https://github.com/bowl1/Behaviour-
 │   │       ├── torch_client.py      # PyTorch regression client (used with Flower)
 │   │       └── defaults.py          # Client creation helpers, aggregation weights, configs
 │   ├── notebooks/
-│   │   ├── 03.Centralized_Training*.ipynb   # Centralised LSTM baselines
+│   │   ├── 03.Centralized_Training*.ipynb   # Centralised LSTM baselines (with PySpark pipeline)
 │   │   ├── 04.Federated_Training_*.ipynb    # Federated training experiments by grouping strategy
 │   │   ├── 09.Make_Predictions_*.ipynb      # Inference & plotting: true vs predicted power
 │   │   ├── geo_*/                           # Geo-based FL variants
@@ -170,6 +170,6 @@ Overall, the clustering in the feature space successfully identifies several dis
 
 ## 4. Tech stack
 
-Python, PyTorch, LSTM, Federated Learning, KMeans++, Time-Series Forecasting, Privacy Protection algorithom
+Python, PyTorch, LSTM, PySpark, Federated Learning, Data Preprocessing, KMeans++, Time-Series Forecasting, Privacy Protection algorithom
 
 ---
