@@ -1,9 +1,14 @@
+import os
+import pickle
+
 from pyspark.sql import SparkSession
 from pyspark.sql.window import Window
 from pyspark.sql.functions import col, lag, row_number, count
 from pyspark.ml.feature import VectorAssembler, MinMaxScaler
 from pyspark.ml.functions import vector_to_array
 from pyspark.ml import Pipeline
+from sklearn.preprocessing import MinMaxScaler as SklearnMinMaxScaler
+import numpy as np
 
 spark = SparkSession.builder \
     .appName("turbine_preprocess_split") \
@@ -166,4 +171,33 @@ val_df.write \
     .mode("overwrite") \
     .parquet("../processed/val")
 
+# =========================
+# 9. SAVE GLOBAL Y_SCALER
+# =========================
+# Reconstruct a sklearn-compatible MinMaxScaler from Spark's PipelineModel
+# so the notebook can apply inverse_transform for comparable metrics.
+
+spark_y_scaler = target_model.stages[1]  # the Spark MinMaxScaler stage
+
+sk_y_scaler = SklearnMinMaxScaler()
+data_min = spark_y_scaler.originalMin.toArray()
+data_max = spark_y_scaler.originalMax.toArray()
+data_range = data_max - data_min
+
+sk_y_scaler.data_min_ = data_min
+sk_y_scaler.data_max_ = data_max
+sk_y_scaler.data_range_ = data_range
+sk_y_scaler.scale_ = np.where(data_range == 0, 0.0, 1.0 / data_range)
+sk_y_scaler.min_ = -data_min * sk_y_scaler.scale_
+sk_y_scaler.feature_range = (0, 1)
+sk_y_scaler.n_features_in_ = len(data_min)
+sk_y_scaler.n_samples_seen_ = train_df.count()
+
+scaler_save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "processed_data", "global_y_scaler.pkl")
+os.makedirs(os.path.dirname(scaler_save_path), exist_ok=True)
+with open(scaler_save_path, "wb") as f:
+    pickle.dump(sk_y_scaler, f)
+
+print(f"Saved global y_scaler → {scaler_save_path}")
+print(f"  power_output original range: [{data_min[0]:.4f}, {data_max[0]:.4f}]")
 print("Spark preprocessing with split complete!")

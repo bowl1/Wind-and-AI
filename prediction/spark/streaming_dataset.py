@@ -16,12 +16,14 @@ class TurbineStreamingDataset(IterableDataset):
         num_lags=24,
         static_cols=("capacity", "age"),
         shuffle=True,
+        forecast_horizon=1,
     ):
         self.paths = sorted(Path(data_dir).glob("GSRN=*"))
         self.target_col = target_col
         self.num_lags = num_lags
         self.static_cols = list(static_cols)
         self.shuffle = shuffle
+        self.forecast_horizon = forecast_horizon
 
     def _parse_dynamic_features(self, columns):
         """
@@ -54,7 +56,11 @@ class TurbineStreamingDataset(IterableDataset):
 
             dynamic_features = self._parse_dynamic_features(columns)
 
-            for _, row in df.iterrows():
+            # sliding window: stop forecast_horizon rows before the end
+            # so we can look ahead for multi-step targets
+            for i in range(len(df) - self.forecast_horizon):
+
+                row = df.iloc[i]
 
                 # --------------------
                 # build time series
@@ -70,13 +76,19 @@ class TurbineStreamingDataset(IterableDataset):
                     for feat in dynamic_features:
                         timestep.append(row[f"{feat}_lag_{lag}"])
 
-                    # static features (broadcast)
+                    # static features (broadcast to every timestep)
                     for s in self.static_cols:
                         timestep.append(row[s])
 
                     seq.append(timestep)
 
                 X = np.array(seq, dtype=np.float32)
-                y = np.array([row[self.target_col]], dtype=np.float32)
+
+                # multi-step targets: t+1, t+2, ..., t+forecast_horizon
+                y_vals = [
+                    df.iloc[i + step][self.target_col]
+                    for step in range(1, self.forecast_horizon + 1)
+                ]
+                y = np.array(y_vals, dtype=np.float32)
 
                 yield torch.from_numpy(X), torch.from_numpy(y)

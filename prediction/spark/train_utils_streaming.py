@@ -11,7 +11,8 @@ def train_streaming(
     device,
     epochs=10,
     lr=1e-3,
-    patience=5
+    patience=5,
+    y_scaler=None,
 ):
 
     model.to(device)
@@ -52,6 +53,11 @@ def train_streaming(
         train_preds = torch.cat(preds).numpy()
         train_targets = torch.cat(targets).numpy()
 
+        # inverse transform to original scale if scaler provided
+        if y_scaler is not None:
+            train_preds = y_scaler.inverse_transform(train_preds)
+            train_targets = y_scaler.inverse_transform(train_targets)
+
         train_mse = np.mean((train_preds - train_targets) ** 2)
         train_rmse = np.sqrt(train_mse)
         train_mae = np.mean(np.abs(train_preds - train_targets))
@@ -64,7 +70,8 @@ def train_streaming(
         val_mse, val_rmse, val_mae, val_r2, _ = test_streaming(
             model,
             val_loader,
-            device
+            device,
+            y_scaler=y_scaler,
         )
 
         print(
@@ -94,7 +101,7 @@ def train_streaming(
 
 
 
-def test_streaming(model, data_loader, device):
+def test_streaming(model, data_loader, device, y_scaler=None):
 
     model.eval()
 
@@ -117,6 +124,11 @@ def test_streaming(model, data_loader, device):
 
     preds = torch.cat(preds).numpy()
     targets = torch.cat(targets).numpy()
+
+    # inverse transform to original scale if scaler provided (matches federated evaluation)
+    if y_scaler is not None:
+        preds = y_scaler.inverse_transform(preds)
+        targets = y_scaler.inverse_transform(targets)
 
     mse = np.mean((preds - targets) ** 2)
     rmse = np.sqrt(mse)

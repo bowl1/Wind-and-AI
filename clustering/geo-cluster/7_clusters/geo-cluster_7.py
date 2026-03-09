@@ -8,7 +8,7 @@ import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
 
 # === Step 1: Load turbine coordinates ===
-df = pd.read_csv("../auto_split/400 turbines/selected turbines/selected_400_turbines_filtered.csv")
+df = pd.read_csv("../../auto_split/400 turbines/selected turbines/selected_400_turbines_filtered.csv")
 df = df[["GSRN", "UTM_x", "UTM_y"]].dropna()
 
 # === Step 2: Apply KMeans clustering on UTM coordinates ===
@@ -54,11 +54,20 @@ for cluster_id, group in gdf.groupby("Cluster"):
     )
 
 ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, zoom=11)
-ax.set_title(" Wind Turbines Grouped by KMeans (7 Clusters)", fontsize=16)
-ax.axis("off")
-ax.legend(handles=legend_elements, loc="lower left", title="Clusters", fontsize=9, title_fontsize=11, frameon=True)
 
-plt.savefig("wind_turbine_kmeans_map.png", dpi=300, bbox_inches='tight', pad_inches=0)
+ax.set_title("Wind Turbines Grouped by KMeans (7 Clusters)", fontsize=25, weight='bold')
+ax.axis("off")
+ax.legend(
+    handles=legend_elements,
+    loc="lower left",
+    prop={"size": 16, "weight": "bold", "family": "serif"},
+    title="Clusters",
+    title_fontproperties={"size": 13, "weight": "bold", "family": "serif"},
+    frameon=True
+)
+
+plt.tight_layout()
+plt.savefig("wind_turbine_kmeans_map.png", dpi=300, bbox_inches="tight", pad_inches=0)
 
 plt.tight_layout()
 plt.show()

@@ -1,5 +1,7 @@
 # Behaviour-Aware Federated Wind Power Forecasting System
 
+📚 associate publication: Bowen Li, Xiufeng Liu, Maria Sinziiana Astefanoaei. "A Behaviour-Aware Federated Forecasting Framework for Distributed Stand-Alone Wind Turbines." arXiv:2603.05263 (2026).  https://arxiv.org/abs/2603.05263
+
 This project targets a very practical problem in modern power systems: how to forecast the output of hundreds of small, independently owned wind turbines without centralizing all raw data. As distributed renewables grow, these turbines collectively influence local grid stability, market participation, and asset revenue, yet their data are often privacy-sensitive and highly heterogeneous. 
 
 By combining behaviour-aware clustering with federated LSTM forecasting, this system offers a way to build accurate, turbine-level short-term power forecasts while keeping data local, reducing communication cost, and providing operators and asset owners with a scalable tool for planning, anomaly detection, and decision-making.

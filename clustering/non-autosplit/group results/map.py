@@ -1,9 +1,11 @@
 import pandas as pd
 import ast
 import geopandas as gpd
-from shapely.geometry import Point
 import matplotlib.pyplot as plt
 import contextily as ctx
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
+from matplotlib.lines import Line2D
 
 # ---------- 1. 读取 cluster_turbine_ids.csv 并展开 GSRN ----------
 cluster_df = pd.read_csv("single_shot_cluster_turbine_ids.csv")  
@@ -71,24 +73,49 @@ print("Turbine count per cluster:")
 print(cluster_counts)
 
 # ---------- 6. 画 Non-autosplit Turbine Clustering ----------
-fig, ax = plt.subplots(figsize=(10, 10))
+n_clusters = gdf_web["Cluster"].nunique()
+colors = cm.get_cmap("tab10", n_clusters)
+cluster_ids = sorted(gdf_web["Cluster"].unique())
+cluster_color_map = {c: mcolors.to_hex(colors(i)) for i, c in enumerate(cluster_ids)}
+
+fig, ax = plt.subplots(figsize=(14, 14))
+legend_elements = []
 
 for cluster_id, group in gdf_web.groupby("Cluster"):
     n = len(group)
     group.plot(
         ax=ax,
-        markersize=25,
+        color=cluster_color_map[cluster_id],
+        markersize=30,
         alpha=0.8,
         edgecolor="black",
-        label = f"Cluster {cluster_id} ({n} turbines)"
+        label=f"Cluster {cluster_id} ({n} turbines)"
+    )
+    legend_elements.append(
+        Line2D(
+            [0], [0],
+            marker="o",
+            color="w",
+            label=f"Cluster {cluster_id} ({n} turbines)",
+            markerfacecolor=cluster_color_map[cluster_id],
+            markeredgecolor="black",
+            markersize=8
+        )
     )
 
-ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, zoom=11)
 
-ax.set_title("Non-autosplit Turbine Clustering", fontsize=14)
-ax.set_axis_off()
-ax.legend(title="Clusters", loc="lower left")
+ax.set_title("Non-autosplit Turbine Clustering", fontsize=25, weight="bold")
+ax.axis("off")
+ax.legend(
+    handles=legend_elements,
+    loc="lower left",
+    prop={"size": 16, "weight": "bold", "family": "serif"},
+    title="Clusters",
+    title_fontproperties={"size": 13, "weight": "bold", "family": "serif"},
+    frameon=True
+)
 
 plt.tight_layout()
+plt.savefig("non_autosplit_turbine_clustering.png", dpi=300, bbox_inches="tight", pad_inches=0)
 plt.show()
-fig.savefig("non_autosplit_turbine_clustering.png", dpi=300)
